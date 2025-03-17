@@ -78,10 +78,10 @@
     <label for="start_date">Selected Date:</label>
     <input type="date" id="start_date" onchange="resetHistory()"><br><br>
 
-    <label for="total_days">Add X total days:</label>
+    <label for="total_days">Add [x] days (<u>include</u> weekends):</label>
     <input type="number" id="total_days" min="0" oninput="clearOtherInput('total_days')"><br><br>
 
-    <label for="weekdays">Add X weekdays:</label>
+    <label for="weekdays">Add [x] weekdays (<u>exclude</u> weekends):</label>
     <input type="number" id="weekdays" min="0" oninput="clearOtherInput('weekdays')"><br><br>
 
     <button onclick="calculateDate()">Calculate</button>

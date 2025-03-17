@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Calculator</title>
+    <script>
+        let history = [];  // Track all calculated dates
+
+        function calculateDate() {
+            const startDate = document.getElementById("start_date").value;
+            const totalDays = document.getElementById("total_days").value;
+            const weekdays = document.getElementById("weekdays").value;
+
+            // Ensure only one option is selected
+            if ((totalDays && weekdays) || (!totalDays && !weekdays)) {
+                alert("Please enter either total days OR weekdays, not both!");
+                return;
+            }
+
+            fetch("/calculate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    start_date: startDate,
+                    total_days: totalDays ? parseInt(totalDays) : null,
+                    weekdays: weekdays ? parseInt(weekdays) : null,
+                    history: history
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById("result").innerText = "New Date: " + data.new_date;
+                    document.getElementById("start_date").value = data.new_date; // Update start date
+                    history = data.history;  // Update history list
+                    updateHistoryList();
+                }
+            });
+        }
+
+        function updateHistoryList() {
+            const historyList = document.getElementById("history_list");
+            historyList.innerHTML = "";  // Clear old history
+
+            history.forEach(date => {
+                const li = document.createElement("li");
+                li.innerText = date;
+                historyList.appendChild(li);
+            });
+        }
+
+        function clearOtherInput(inputType) {
+            if (inputType === "total_days") {
+                document.getElementById("weekdays").value = "";
+            } else {
+                document.getElementById("total_days").value = "";
+            }
+        }
+
+        function resetHistory() {
+            history = [];
+            document.getElementById("history_list").innerHTML = "";
+        }
+
+        // Set default start date to today
+        window.onload = function() {
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("start_date").value = today;
+            resetHistory();
+        };
+    </script>
+</head>
+<body>
+    <h2>Date Calculator</h2>
+    <label for="start_date">Selected Date:</label>
+    <input type="date" id="start_date" onchange="resetHistory()"><br><br>
+
+    <label for="total_days">Add X total days:</label>
+    <input type="number" id="total_days" min="0" oninput="clearOtherInput('total_days')"><br><br>
+
+    <label for="weekdays">Add X weekdays:</label>
+    <input type="number" id="weekdays" min="0" oninput="clearOtherInput('weekdays')"><br><br>
+
+    <button onclick="calculateDate()">Calculate</button>
+
+    <h3 id="result"></h3>
+
+    <h3>History of Dates:</h3>
+    <ul id="history_list"></ul>
+</body>
+</html>
